@@ -2,17 +2,19 @@
 
 var globalData = {
     users: {
-        '0a4AHr79Awk' :{
+        'demo' :{
             name: '张三',
-            id: '',
+            uid: '',
             comments: [             // 评论了多少次
-                {
-                    url: '',        // 言论地址
-                    text: '',     //言论内容
-                    nickName: '',   //评论时的昵称
-                }        
+                // {
+                //     url: '',        // 言论地址
+                //     text: '',     //言论内容
+                //     nickName: '',   //评论时的昵称
+                // }        
             ],
-            gossips: [],    //发布了多少言论
+            gossips: [
+
+            ],    //发布了多少言论
             likes: 0,       // 被点赞了多少次
         },
     }
@@ -39,12 +41,12 @@ function queryWord(word, limit=20) {
                 console.log(rep)
 
                 for (let index = 0; index < gossips.length; index++) {
-                    const gosip = gossips[index];
-                    const gid = gosip.gid;
-                    const egid = gosip.egid;
-                    const encode_id = gosip.encode_id;
-                    const likes = gosip.likes;
-                    getComments(gid, egid, auth_info)
+                    const item = gossips[index];
+                    const gid = item.gid;
+                    const egid = item.gossip.egid;
+                    const encode_id = item.gossip.encode_id;
+                    const likes = item.gossip.likes;
+                    getComments(gid, egid, encode_id, auth_info)
                 }
                 
             } else {
@@ -55,7 +57,7 @@ function queryWord(word, limit=20) {
     })
 }
 
-function getComments(gid, egid, auth_info) {
+function getComments(gid, egid, encode_id, auth_info) {
     var queryParams = {
         gid: gid,
         egid: egid,
@@ -72,7 +74,7 @@ function getComments(gid, egid, auth_info) {
         success: function(rep) {
             if (rep.result === 'ok') {
                 var comments = rep.comments;
-                pushData(comments);
+                pushData(comments, encode_id);
                 console.log(rep)
             } else {
                 alert('数据异常')
@@ -82,32 +84,38 @@ function getComments(gid, egid, auth_info) {
     })
 }
 
-function pushData(comments) {
+function pushData(comments, encode_id) {
     for (let index = 0; index < comments.length; index++) {
         const com = comments[index];
         const mmid = com.mmid;
         const text = com.text;
-        
+        const uid = com.id;
+        const nickName = com.name;
+        const url = 'https://maimai.cn/web/gossip_detail?encode_id=' + encode_id;
+        const lz = com.lz; // 1楼主
+        if (!globalData.users[mmid]) {
+            globalData.users[mmid] = {
+                name: nickName,
+                uid: uid,
+                comments: [
+                    {
+                        url,
+                        text,
+                        nickName
+                    }        
+                ],
+                gossips: [
+    
+                ],
+                likes: 0
+            }
+        } else {
+            globalData.users[mmid].comments.push({
+                url,
+                text,
+                nickName
+            })
+        }
     }
-    var comments = {
-        real: 0
-        major: 255
-        likes: 0
-        mmid: "S4+ttN+KgHU"
-        career: ""
-        text: "什么岗"
-        reply_text: ""
-        profession: 255
-        is_top: 0
-        mylike: 0
-        rich_text: "<dref t=-1 f=13.5 cs=#191919>什么岗</dref>"
-        prefix: ""
-        name_color: "#ffefa932"
-        avatar: "https://i9.taou.com/maimai/c/offlogo/81983fd1d9d64ebebd8989e758a8906c.png"
-        judge: 1
-        lz: 0
-        id: 42144564
-        gossip_uid: "S4+ttN+KgHU"
-        name: "滴滴出行员工"
-    }
+    
 }
