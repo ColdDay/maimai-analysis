@@ -1,0 +1,22 @@
+{
+  "name": "maimai-analysis",
+  "version": "1.0.0",
+  "description": "",
+  "main": "maimai.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ColdDay/maimai-analysis.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ColdDay/maimai-analysis/issues"
+  },
+  "homepage": "https://github.com/ColdDay/maimai-analysis#readme",
+  "dependencies": {
+    "axios": "^0.19.2"
+  }
+}
