@@ -6,17 +6,17 @@ var globalData = {
             name: '张三',
             uid: '',
             comments: [             // 评论了多少次
-                // {
-                //     url: '',        // 言论地址
-                //     text: '',     //言论内容
-                //     nickName: '',   //评论时的昵称
-                // }        
+                
             ],
             gossips: [
 
             ],    //发布了多少言论
             likes: 0,       // 被点赞了多少次
         },
+    },
+    progress: {
+        ok: 0,
+        max: 0
     }
 }
 
@@ -25,11 +25,12 @@ function queryWord(word, limit=20) {
         query: word,
         limit: limit,
         offset: 0,
-        searchTokens: [word],
+        searchTokens: "["+word+"]",
         highlight: false,
         jsononly: 1
 
     }
+    globalData.progress.max = limit;
     $.ajax({
         url: 'https://maimai.cn/search/gossips',
         method: 'GET',
@@ -38,14 +39,47 @@ function queryWord(word, limit=20) {
             if (rep.result === 'ok') {
                 var gossips = rep.data.gossips;
                 var auth_info = rep.auth_info;
-                console.log(rep)
-
                 for (let index = 0; index < gossips.length; index++) {
                     const item = gossips[index];
                     const gid = item.gid;
                     const egid = item.gossip.egid;
                     const encode_id = item.gossip.encode_id;
                     const likes = item.gossip.likes;
+                    const url = 'https://maimai.cn/web/gossip_detail?encode_id=' + encode_id;
+                    const text = item.gossip.text;
+                    const nickName = item.gossip.username;
+                    const uid = item.gossip.id;
+                    const crtime = item.gossip.crtime;  // 创建时间
+                    getGodMid(encode_id, function(mmid, time) {
+                        if (!globalData.users[mmid]) {
+                            globalData.users[mmid] = {
+                                name: nickName,
+                                uid: uid,
+                                comments: [      
+                                ],
+                                gossips: [
+                                    {
+                                        url,
+                                        text,
+                                        nickName,
+                                        crtime,
+                                        likes,
+                                        total_cnt
+                                    } 
+                                ],
+                                likes: 0
+                            }
+                        } else {
+                            globalData.users[mmid].gossips.push({
+                                url,
+                                text,
+                                nickName,
+                                crtime,
+                                likes,
+                                total_cnt
+                            })
+                        }
+                    })
                     getComments(gid, egid, encode_id, auth_info)
                 }
                 
@@ -66,16 +100,17 @@ function getComments(gid, egid, encode_id, auth_info) {
         hotcmts_limit_count: 1
     }
     const params = Object.assign(queryParams, auth_info)
-    console.log(params);
+
     $.ajax({
         url: 'https://maimai.cn/sdk/web/gossip/getcmts',
         method: 'GET',
         data: params,
         success: function(rep) {
+            globalData.progress.ok++;
+            console.log(globalData.progress.ok)
             if (rep.result === 'ok') {
                 var comments = rep.comments;
                 pushData(comments, encode_id);
-                console.log(rep)
             } else {
                 alert('数据异常')
             }
@@ -83,7 +118,22 @@ function getComments(gid, egid, encode_id, auth_info) {
         }
     })
 }
+function getGodMid(encode_id, callback) {
+    var url = 'https://maimai.cn/web/gossip_detail?encode_id=' + encode_id;
+    $.ajax({
+        url,
+        method: 'GET',
+        success: function(rep) {
 
+            var jsonStr = JSON.parse(rep.split('JSON.parse(')[1].split(');</script>')[0]);
+            const jsonData = JSON.parse(jsonStr);
+            const mmid = jsonData.data.gossip.mmid;
+            const time = jsonData.data.gossip.time;
+            callback(mmid, time)
+            
+        }
+    })
+}
 function pushData(comments, encode_id) {
     for (let index = 0; index < comments.length; index++) {
         const com = comments[index];
@@ -91,8 +141,8 @@ function pushData(comments, encode_id) {
         const text = com.text;
         const uid = com.id;
         const nickName = com.name;
+        const likes = com.likes
         const url = 'https://maimai.cn/web/gossip_detail?encode_id=' + encode_id;
-        const lz = com.lz; // 1楼主
         if (!globalData.users[mmid]) {
             globalData.users[mmid] = {
                 name: nickName,
@@ -101,21 +151,23 @@ function pushData(comments, encode_id) {
                     {
                         url,
                         text,
-                        nickName
+                        nickName,
+                        likes
                     }        
                 ],
                 gossips: [
     
-                ],
-                likes: 0
+                ]
             }
         } else {
             globalData.users[mmid].comments.push({
                 url,
                 text,
-                nickName
+                nickName,
+                likes
             })
         }
     }
     
 }
+queryWord('马蜂窝', 20)
