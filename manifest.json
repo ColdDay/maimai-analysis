@@ -1,10 +1,23 @@
 {
-    "name": "视频转GIF",
-    "description" : "视频转GIF",
+    "name": "脉脉职言分析",
+    "description" : "脉脉职言分析，快速查找",
     "version": "1.4",
-     "manifest_version": 2,
+    "manifest_version": 2,
     "browser_action": {
         "default_popup": "index.html",
-        "default_icon": "images/mp4ToGif.png"
-    }
+        "default_icon": "images/logo.png"
+    },
+    "content_scripts": 
+	[
+		{
+            "matches": ["https://maimai.cn/*", "http://maimai.cn/*"],
+            "js": ["js/bridge.js"],
+            "css": ["css/index.css"],
+            "run_at": "document_start"
+		}
+    ],
+    "web_accessible_resources": ["js/main.js"],
+    "permissions": [
+		"tabs", "http://maimai.cn/*", "https://maimai.cn/*"
+	]
  }
