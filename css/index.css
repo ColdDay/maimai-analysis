@@ -9,12 +9,12 @@
 }
 .ma-flex-box{
     width: 60%;
-    height: 500px;
+    height: 600px;
     background-color: #fff;
     margin: 0 auto;
     position: relative;
     top: 50%;
-    margin-top: -250px;
+    margin-top: -300px;
     border-radius: 5px;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.495);
 }
@@ -26,9 +26,7 @@
     height: 32px;
     background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAAaVBMVEUAAAD////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////8G612AAAAInRSTlMAKtSpcQzr3sl3WoBqZkZA8+HVtqGblIZVTjcmGBYC4Is98Ppc6AAAAhxJREFUWMPdV1migyAMxIJ71S5uXazW+x/yYbVGGlks76v5UsiMkAwxkB8317kwdnHcr8DPKvD6ybygem4CN0k+g2eSPGkM4Q/m96vms4cJPgpG9wNlUXZz3VsWMXoYx4JIC7+ex4+VqTieluOyzlc1vn7t/bRfm9ufXrGoVfhkcDmGriSr4XGYT+T4cJind7nDnQ4eofL7lCiNKtaQAl7HkK7Gf5iJidbiwW8lF04LeD1D66DhIf8VMbJq0APSHx/MiaHl3Dn60H/A8383JbhzPQTiuWCS9CoEw4Tz63P9gv6yMHZQkOMwA01yVfvNUuaccaH/ou93zgd+1/cFAizV4QuJAgbAC0n2Rc15Mz24AwMMCIv0RBHXBDPI8aQWBN3x+kPAAIJewHiN6uaXADaEGBAewhYsQ8CIhEGCJ2wRBBeUiRkAj7Xvvl35c0YkDBI8yfj4e/jCn29EwiDBkxufuMzbgdUgBoyHfTNrAustWAfROo22Qvo/KVffHaYK2hk4m/rjDBXgKRSUcltBKacQQKH3xVlc0sRv+OJvJBFrZLheVEOxqCaKsl6UuKyXBSrrlj8W618bViY1JaBr2j8Dgwn+jBsUDxj0eO+Kx+stLU4tbdJiI3wiS46+zan0jWKuajRzTauamrS6qbJZb3XNdqtp152p3S/qjxwVU7vv2F847K88emv2FF+66L4hWyztlte+LrW7eP62/QEkvFqZ9LjM8gAAAABJRU5ErkJggg==') no-repeat center;
     background-size: cover;
-}
-.ma-header{
-    
+    cursor: pointer;
 }
 .ma-title{
     margin: 0;
@@ -37,12 +35,20 @@
 }
 .ma-form{
     margin-top: 20px;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     border-bottom: 1px solid #ccc;
-    padding-bottom: 12px;
+    padding-bottom: 4px;
 }
 .ma-actions{
     display: inline-block;
+    line-height: 32px;
+}
+.ma-actions.ma-sort{
+    float: right;
+    margin-right: 30px;
+}
+.ma-actions.ma-sort label{
+    margin-left: 20px;
 }
 .ma-label{
     display: inline-block;
@@ -60,7 +66,7 @@
     border: 1px solid #ccc;
     border-radius: 6px;
     font-size: 14px;
-    padding: 5px 10px;
+    padding: 0px 12px;
     cursor: pointer;
 }
 .ma-btn:hover{
@@ -71,6 +77,8 @@
 }
 .ma-content{
     padding: 0 20px;
+    height: 400px;
+    overflow: auto;
 }
 .ma-table{
     width: 100%;
@@ -95,8 +103,10 @@
     background: #eee;
 }
 .ma-detail-row{
-    
     border-bottom: 1px solid #ccc;
+}
+.ma-detail-row a {
+    color: blue;
 }
 .ma-detail-p{
     padding: 10px 5px;
@@ -115,4 +125,17 @@
 }
 .ma-switch:hover{
     transform: translateX(-20px);
+}
+.zip-detail{
+    display: block;
+    color: blue;
+    cursor: pointer;
+    padding: 2px 4px;
+    width: 40px;
+}
+.ma-loading{
+    display: none;
+    font-size: 24px;
+    text-align: center;
+    padding: 100px 0;
 }

@@ -18,16 +18,17 @@ var globalData = {
     progress: {
         ok: 0,
         max: 0
-    }
+    },
+    isLoading: false
 }
 initMaiMaiPlugin()
 function initMaiMaiPlugin() {
     var html = `
-        <span class="ma-switch" onclick="showMaimai()"></span>
+        <span class="ma-switch" onclick="ma_showMaimai()"></span>
     `
     document.body.insertAdjacentHTML('beforeend', html);
 }
-function showMaimai() {
+function ma_showMaimai() {
     var maimaiBox = document.querySelector('.maimai-analysis');
     if (maimaiBox) {
         maimaiBox.style.display = 'block';
@@ -44,10 +45,11 @@ function showMaimai() {
                         <span class="ma-label">关键词</span><input type="text" class="ma-input ma-keyword" id="ma-keyword" placeholder="阿里/腾讯/百度/头条">
                     </div>
                     <div class="ma-actions">
-                        <span class="ma-label">ID</span><input type="text" class="ma-input ma-mid" id="ma-mid" placeholder="In4u2Ir]a6AY">
+                        <div class="ma-btn" onclick="ma_queryWord()">搜索</div>
                     </div>
-                    <div class="ma-actions">
-                        <div class="ma-btn" onclick="queryWord()">搜索</div>
+                    <div class="ma-actions ma-sort">
+                        <label>按职言排序 <input name="masort" type="radio" value="1" checked="checked" onclick="ma_changeSort()"></label>
+                        <label>按评论排序 <input name="masort" type="radio" value="2" onclick="ma_changeSort()"></label>
                     </div>
                 </div>
                 <div class="ma-content">
@@ -56,15 +58,16 @@ function showMaimai() {
                             <tr>
                                 <th width="10%">序号</th>
                                 <th width="25%">昵称</th>
-                                <th width="15%">ID</th>
+                                <th width="30%">ID</th>
                                 <th>发布职言</th>
-                                <th>发布评论数</th>
+                                <th>发布评论</th>
                             </tr>
                         </thead>
                         <tbody class="ma-tbody">
                             
                         </tbody>
                     </table>
+                    <span class="ma-loading"></span>
                 </div>
                 <span class="ma-close" onclick="closeMaimai()"></span>
             </div>
@@ -77,9 +80,18 @@ function closeMaimai(){
     var maimai = document.querySelector('.maimai-analysis');
     maimai.style.display = 'none';
 }
-function queryWord(word, limit=20) {
+function ma_queryWord() {
     var word = document.querySelector('#ma-keyword').value;
-    var mmid = document.querySelector('#ma-mid').value;
+    if (!word) {
+        alert('输入关键字才可以精确查找！');
+        return;
+    }
+    var sort = $("[name='masort']").filter(":checked").val(); 
+    globalData.isLoading = true;
+    var tbody = document.querySelector('.ma-tbody');
+    tbody && tbody.remove();
+    document.querySelector('.ma-loading').style.display = 'block';
+    var limit = 20;
     globalData = {
         users: {
         },
@@ -93,7 +105,7 @@ function queryWord(word, limit=20) {
         query: word,
         limit: limit,
         offset: 0,
-        searchTokens: "["+word+"]",
+        // searchTokens: "["+word+"]",
         highlight: false,
         jsononly: 1
     }
@@ -105,7 +117,7 @@ function queryWord(word, limit=20) {
         success: function(rep) {
             if (rep.result === 'ok') {
                 var gossips = rep.data.gossips;
-                globalData.progress.max = gossips.length - 1;
+                globalData.progress.max = gossips.length;
                 var auth_info = rep.auth_info;
                 for (let index = 0; index < gossips.length; index++) {
                     const item = gossips[index];
@@ -119,7 +131,8 @@ function queryWord(word, limit=20) {
                     const uid = item.gossip.id;
                     const crtime = item.gossip.crtime;  // 创建时间
                     const total_cnt = item.gossip.total_cnt;
-                    getGodMid(encode_id, function(mmid, time) {
+                    ma_getGodMid(encode_id, function(mmid, time) {
+                        if (!mmid) return;
                         if (!globalData.users[mmid]) {
                             globalData.users[mmid] = {
                                 name: nickName,
@@ -176,26 +189,30 @@ function getComments(gid, egid, encode_id, auth_info) {
         data: params,
         success: function(rep) {
             globalData.progress.ok++;
+            var loadingEle = document.querySelector('.ma-loading');
+            loadingEle && (loadingEle.innerText = parseInt(globalData.progress.ok/globalData.progress.max * 100) + ' %');
             console.log(globalData.progress.ok)
             if (rep.result === 'ok') {
                 var comments = rep.comments;
-                pushData(comments, encode_id);
+                ma_pushData(comments, encode_id);
             } else {
-                alert('数据异常')
+                console.error('数据异常')
             }
             if (globalData.progress.ok == globalData.progress.max) {
                 console.log('查询完毕');
+                loadingEle.style.display = 'none';
+                loadingEle.innerText = '';
                 for (let i in globalData.users) {
                     globalData.userArr.push(globalData.users[i]);
                 }
-                maSort(globalData.userArr, 'gossips', 'down');
-                initTable();
+                ma_sort(globalData.userArr, 'gossips', 'down');
+                ma_initTable();
             }
             
         }
     })
 }
-function getGodMid(encode_id, callback) {
+function ma_getGodMid(encode_id, callback) {
     var url = 'https://maimai.cn/web/gossip_detail?encode_id=' + encode_id;
     $.ajax({
         url,
@@ -211,7 +228,7 @@ function getGodMid(encode_id, callback) {
         }
     })
 }
-function pushData(comments, encode_id) {
+function ma_pushData(comments, encode_id) {
     for (let index = 0; index < comments.length; index++) {
         const com = comments[index];
         const mmid = com.mmid;
@@ -249,9 +266,7 @@ function pushData(comments, encode_id) {
     
 }
 
-
-
-function maSort(arr, filed, type) {
+function ma_sort(arr, filed, type) {
     var len = arr.length;
     for (var i = 0; i < len-1; i++) {
       for (var j = 0; j < len - 1 - i; j++) {
@@ -273,17 +288,17 @@ function maSort(arr, filed, type) {
     }
     return arr;
 }
-function initTable() {
+function ma_initTable() {
     var tempHtml = `<tbody class="ma-tbody">`;
     for (let index = 0; index < globalData.userArr.length; index++) {
         const user = globalData.userArr[index];
         tempHtml+= `
         <tr id="${user.mmid}">
             <td>${index}</td>
-            <td>${user.nickName}</td>
+            <td>${user.name}</td>
             <td>${user.mmid}</td>
-            <td onclick="showDetail('${user.mmid}','gossips')">${user.gossips.length}</td>
-            <td onclick="showDetail('${user.mmid}','comments')">${user.comments.length}</td>
+            <td onclick="ma_showDetail('${user.mmid}','gossips')"><span class="ma-num">${user.gossips.length}</span></td>
+            <td onclick="ma_showDetail('${user.mmid}','comments')"><span class="ma-num">${user.comments.length}</span></td>
         </tr>
         `
         
@@ -291,43 +306,59 @@ function initTable() {
     tempHtml+="</tbody>";
     var table = document.querySelector('.ma-table');
     var tbody = document.querySelector('.ma-tbody');
-    tbody.remove();
+    tbody && tbody.remove();
     table.innerHTML += tempHtml
 }
-function showDetail(mmid, type) {
-    var tempHtml = `<td colspan="5" class="ma-table-detail">`;
+function ma_showDetail(mmid, type) {
+    var tempHtml = `<td colspan="5" class="ma-table-detail"><span class="zip-detail" onclick="ma_zipDetail('${mmid}')">收起</span>`;
     var user = globalData.users[mmid];
-    for (let index = 0; index < user.gossips.length; index++) {
-        const god = user.gossips[index];
+    var dataKey =  'gossips';
+    if (type === 'comments') {
+        dataKey = 'comments'
+    }
+    for (let index = 0; index < user[dataKey].length; index++) {
+        const item = user[dataKey][index];
         if (type == 'gossips') {
             tempHtml+= `
                 <div class="ma-detail-row">
                     <p class="ma-detail-p">
-                        <span>${god.nickName}</span>
-                        <span>发布时间：${god.crtime}</span>
-                        <span>评论：${god.total_cnt}</span>
-                        <span>点赞：${god.likes}</span>
+                        <span>${item.nickName}</span>
+                        <span>发布时间：${item.crtime}</span>
+                        <span>评论：${item.total_cnt}</span>
+                        <span>点赞：${item.likes}</span>
                     </p>
-                    <p><a href="${god.url}">${god.text}</a></p>
+                    <p><a href="${item.url}" target="_blank">${item.text}</a></p>
                 </div>
             `
         } else {
             tempHtml+= `
                 <div class="ma-detail-row">
                     <p class="ma-detail-p">
-                        <span>${god.nickName}</span>
-                        <span>点赞：${god.likes}</span>
+                        <span>${item.nickName}</span>
+                        <span>点赞：${item.likes}</span>
                     </p>
-                    <p><a href="${god.url}">${god.text}</a></p>
+                    <p><a href="${item.url}" target="_blank">${item.text}</a></p>
                 </div>
             `
         }   
     }
     tempHtml+="</td>";
-    var row = document.querySelector('#' + mmid);
+    var row = document.getElementById( mmid);
     if (!row.nextElementSibling.id) {
         // 若存在详情，先清空
         row.nextElementSibling.remove()
     }
     row.insertAdjacentHTML('afterend', tempHtml);
+}
+function ma_zipDetail(mmid) {
+    var row = document.getElementById(mmid);
+    row.nextElementSibling.remove()
+}
+function ma_changeSort() {
+    if (globalData.isLoading) {
+        return;
+    }
+    var sort = $("[name='masort']").filter(":checked").val();
+    ma_sort(globalData.userArr, sort == '1' ? 'gossips' : 'comments', 'down');
+    ma_initTable(); 
 }
