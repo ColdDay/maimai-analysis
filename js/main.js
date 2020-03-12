@@ -17,7 +17,8 @@ var globalData = {
     userArr: [],
     progress: {
         ok: 0,
-        max: 0
+        max: 0,
+        midOk: 0
     },
     isLoading: false
 }
@@ -67,7 +68,7 @@ function ma_showMaimai() {
                             
                         </tbody>
                     </table>
-                    <span class="ma-loading"></span>
+                    <span class="ma-loading">查询中</span>
                 </div>
                 <span class="ma-close" onclick="closeMaimai()"></span>
             </div>
@@ -91,14 +92,15 @@ function ma_queryWord() {
     var tbody = document.querySelector('.ma-tbody');
     tbody && tbody.remove();
     document.querySelector('.ma-loading').style.display = 'block';
-    var limit = 20;
+    var limit = 200;
     globalData = {
         users: {
         },
         userArr: [],
         progress: {
             ok: 0,
-            max: 0
+            max: 0,
+            midOk: 0
         }
     }
     var queryParams = {
@@ -119,6 +121,10 @@ function ma_queryWord() {
                 var gossips = rep.data.gossips;
                 globalData.progress.max = gossips.length;
                 var auth_info = rep.auth_info;
+                if (!gossips.length) {
+                    document.querySelector('.ma-loading').innerText = '暂无数据，换个关键词搜索吧～';
+                    return
+                }
                 for (let index = 0; index < gossips.length; index++) {
                     const item = gossips[index];
                     const gid = item.gid;
@@ -132,16 +138,23 @@ function ma_queryWord() {
                     const crtime = item.gossip.crtime;  // 创建时间
                     const total_cnt = item.gossip.total_cnt;
                     ma_getGodMid(encode_id, function(mmid, time) {
-                        if (!mmid) return;
+                        console.log(globalData.progress.midOk)
+                        globalData.progress.midOk+=1;
+                        if (!mmid) mmid=new Date().getTime();
+                        
                         if (!globalData.users[mmid]) {
                             globalData.users[mmid] = {
                                 name: nickName,
                                 uid: uid,
                                 mmid,
+                                auth_info,
                                 comments: [      
                                 ],
                                 gossips: [
                                     {
+                                        gid,
+                                        egid,
+                                        encode_id,
                                         url,
                                         text,
                                         nickName,
@@ -153,6 +166,9 @@ function ma_queryWord() {
                             }
                         } else {
                             globalData.users[mmid].gossips.push({
+                                gid,
+                                egid,
+                                encode_id,
                                 url,
                                 text,
                                 nickName,
@@ -161,8 +177,14 @@ function ma_queryWord() {
                                 total_cnt
                             })
                         }
+                        console.log(globalData.progress.midOk, gossips.length)
+                        if (globalData.progress.midOk == gossips.length) {
+                            // mid查询结束，开始查询评论
+                            forQueryComment()
+                        }
                     })
-                    getComments(gid, egid, encode_id, auth_info)
+                    
+                    
                 }
                 
             } else {
@@ -172,7 +194,18 @@ function ma_queryWord() {
         }
     })
 }
-
+function forQueryComment() {
+    for (const key in globalData.users) {
+        if (globalData.users.hasOwnProperty(key)) {
+            const user = globalData.users[key];
+            for (let index = 0; index < user.gossips.length; index++) {
+                const gossip = user.gossips[index];
+                getComments(gossip.gid, gossip.egid, gossip.encode_id, user.auth_info)
+            }
+            
+        }
+    }
+}
 function getComments(gid, egid, encode_id, auth_info) {
     var queryParams = {
         gid: gid,
@@ -191,21 +224,21 @@ function getComments(gid, egid, encode_id, auth_info) {
             globalData.progress.ok++;
             var loadingEle = document.querySelector('.ma-loading');
             loadingEle && (loadingEle.innerText = parseInt(globalData.progress.ok/globalData.progress.max * 100) + ' %');
-            console.log(globalData.progress.ok)
             if (rep.result === 'ok') {
                 var comments = rep.comments;
                 ma_pushData(comments, encode_id);
             } else {
                 console.error('数据异常')
             }
-            if (globalData.progress.ok == globalData.progress.max) {
+            if (globalData.progress.ok == globalData.progress.max - 1) {
                 console.log('查询完毕');
                 loadingEle.style.display = 'none';
-                loadingEle.innerText = '';
+                loadingEle.innerText = '查询中';
                 for (let i in globalData.users) {
                     globalData.userArr.push(globalData.users[i]);
                 }
-                ma_sort(globalData.userArr, 'gossips', 'down');
+                var sort = $("[name='masort']").filter(":checked").val();
+                ma_sort(globalData.userArr, sort == '1' ? 'gossips' : 'comments', 'down');
                 ma_initTable();
             }
             
@@ -322,10 +355,10 @@ function ma_showDetail(mmid, type) {
             tempHtml+= `
                 <div class="ma-detail-row">
                     <p class="ma-detail-p">
-                        <span>${item.nickName}</span>
-                        <span>发布时间：${item.crtime}</span>
-                        <span>评论：${item.total_cnt}</span>
-                        <span>点赞：${item.likes}</span>
+                        <span><b>昵称：</b>${item.nickName}</span> | 
+                        <span><b>发布时间：</b>${item.crtime}</span> | 
+                        <span><b>评论：</b>${item.total_cnt}</span> | 
+                        <span><b>点赞：</b>${item.likes}</span>
                     </p>
                     <p><a href="${item.url}" target="_blank">${item.text}</a></p>
                 </div>
@@ -334,8 +367,8 @@ function ma_showDetail(mmid, type) {
             tempHtml+= `
                 <div class="ma-detail-row">
                     <p class="ma-detail-p">
-                        <span>${item.nickName}</span>
-                        <span>点赞：${item.likes}</span>
+                        <span><b>昵称：${item.nickName}</b></span> | 
+                        <span><b>点赞：${item.likes}</b></span>
                     </p>
                     <p><a href="${item.url}" target="_blank">${item.text}</a></p>
                 </div>
@@ -344,7 +377,7 @@ function ma_showDetail(mmid, type) {
     }
     tempHtml+="</td>";
     var row = document.getElementById( mmid);
-    if (!row.nextElementSibling.id) {
+    if (row && !row.nextElementSibling.id) {
         // 若存在详情，先清空
         row.nextElementSibling.remove()
     }
@@ -352,7 +385,7 @@ function ma_showDetail(mmid, type) {
 }
 function ma_zipDetail(mmid) {
     var row = document.getElementById(mmid);
-    row.nextElementSibling.remove()
+    row && row.nextElementSibling.remove()
 }
 function ma_changeSort() {
     if (globalData.isLoading) {

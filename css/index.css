@@ -8,7 +8,7 @@
     z-index: 99999;
 }
 .ma-flex-box{
-    width: 60%;
+    width: 80%;
     height: 600px;
     background-color: #fff;
     margin: 0 auto;
@@ -38,6 +38,7 @@
     margin-bottom: 8px;
     border-bottom: 1px solid #ccc;
     padding-bottom: 4px;
+    padding-left: 20px;
 }
 .ma-actions{
     display: inline-block;
@@ -77,7 +78,7 @@
 }
 .ma-content{
     padding: 0 20px;
-    height: 400px;
+    height: 460px;
     overflow: auto;
 }
 .ma-table{
@@ -85,6 +86,8 @@
 }
 .ma-table th{
     text-align: center;
+    background-color: #cccccc91;
+    padding: 8px 0;
 }
 .ma-table td{
     text-align: center;
@@ -127,6 +130,7 @@
     transform: translateX(-20px);
 }
 .zip-detail{
+    float: right;
     display: block;
     color: blue;
     cursor: pointer;
