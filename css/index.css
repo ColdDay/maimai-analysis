@@ -49,14 +49,20 @@
     margin-right: 30px;
 }
 .ma-actions.ma-sort label{
+    font-weight: normal;
+    margin-right: 10px;
+}
+.ma-query-btn{
     margin-left: 20px;
 }
+
 .ma-label{
     display: inline-block;
     font-size: 14px;
     padding: 0 5px;
     height: 32px;
     line-height: 32px;
+    font-weight: 400;
 }
 .ma-input{
     height: 32px;
@@ -107,6 +113,8 @@
 }
 .ma-detail-row{
     border-bottom: 1px solid #ccc;
+    padding: 0 10px;
+    text-align: left;
 }
 .ma-detail-row a {
     color: blue;
@@ -114,6 +122,12 @@
 .ma-detail-p{
     padding: 10px 5px;
 }
+.ma-detail-text{
+    padding-left: 20px;
+}
+.ma-detail-text a{
+    color: blue;
+ }
 .ma-switch{
     position: fixed;
     top: 100px;
@@ -132,7 +146,7 @@
 .zip-detail{
     float: right;
     display: block;
-    color: blue;
+    color: orange;
     cursor: pointer;
     padding: 2px 4px;
     width: 40px;
@@ -142,4 +156,54 @@
     font-size: 24px;
     text-align: center;
     padding: 100px 0;
+}
+.ma-caret-wrapper {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    height: 34px;
+    width: 24px;
+    vertical-align: middle;
+    cursor: pointer;
+    overflow: initial;
+    position: relative;
+}
+.ma-ascending {
+    border-bottom-color: #c0c4cc;
+    top: 5px;
+}
+.ma-descending{
+    border-top-color: #409eff;
+}
+.ma-sort-caret {
+    width: 0;
+    height: 0;
+    border: 5px solid transparent;
+    position: absolute;
+    left: 7px;
+}
+.ma-help{
+    border-radius: 100px;
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    text-align: center;
+    color: #fff;
+    background: #b1b1b1;
+    line-height: 15px;
+    margin-left: 2px;
+    font-style: normal;
+    font-weight: 800;
+    cursor: pointer;
+}
+.lookComment{
+    cursor: pointer;
+    color: orange;
+    padding-left: 20px;
+}
+.ma-gid-detail-p{
+    padding-left: 80px;
+}
+.commentDetailBox div:last-child{
+    border: none;
 }

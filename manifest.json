@@ -1,23 +1,26 @@
 {
     "name": "脉脉职言分析",
-    "description" : "脉脉职言分析，快速查找",
-    "version": "1.0",
+    "description" : "快速查找关键词下的职言，分析职言数据，组合职言用户数据，发现不一样的乐趣",
+    "version": "1.1",
     "manifest_version": 2,
     "browser_action": {
         "default_popup": "index.html",
         "default_icon": "images/logo.png"
     },
+    "icons":
+	{
+		"16": "images/logo-16.png",
+		"48": "images/logo-48.png",
+		"128": "images/logo-128.png"
+	},
     "content_scripts": 
-	[
-		{
-            "matches": ["https://maimai.cn/*", "http://maimai.cn/*"],
-            "js": ["js/bridge.js"],
-            "css": ["css/index.css"],
-            "run_at": "document_start"
-		}
+	  [
+      {
+              "matches": ["https://maimai.cn/*", "http://maimai.cn/*"],
+              "js": ["js/bridge.js"],
+              "css": ["css/index.css"],
+              "run_at": "document_start"
+      }
     ],
-    "web_accessible_resources": ["js/main.js"],
-    "permissions": [
-		"tabs", "http://maimai.cn/*", "https://maimai.cn/*"
-	]
+    "web_accessible_resources": ["js/main.js"]
  }
