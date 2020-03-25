@@ -1,7 +1,7 @@
 {
     "name": "脉脉职言分析",
     "description" : "快速查找关键词下的职言，分析职言数据，组合职言用户数据，发现不一样的乐趣",
-    "version": "1.1",
+    "version": "1.3",
     "manifest_version": 2,
     "browser_action": {
         "default_popup": "index.html",

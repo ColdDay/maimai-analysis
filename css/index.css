@@ -34,7 +34,7 @@
     text-align: center;
 }
 .ma-form{
-    margin-top: 20px;
+    margin-top: 10px;
     margin-bottom: 8px;
     border-bottom: 1px solid #ccc;
     padding-bottom: 4px;
@@ -206,4 +206,11 @@
 }
 .commentDetailBox div:last-child{
     border: none;
+}
+.ma-more-link{
+    float: right;
+    font-size: 14px;
+    color: blue;
+    line-height: 1;
+    padding: 10px 0;
 }

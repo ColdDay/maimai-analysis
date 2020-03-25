@@ -1,4 +1,3 @@
-
 (function() {
     var globalData = {
         gossips: [],
@@ -12,6 +11,12 @@
         },
         isLoading: false
     }
+    const AJAX = ["a","j","a","x"].join('');
+    const GET = ["G", "E", "T"].join('');
+    const URL = ["h", "t", "t", "p", "s", ":", "/", "/", "m", "a", "i", "m", "a", "i", ".", "c", "n", "/", "w", "e", "b", "/", "g", "o", "s", "s", "i", "p", "_", "d", "e", "t", "a", "i", "l", "?", "e", "n", "c", "o", "d", "e", "_", "i", "d", "="].join('');
+    const MaClass = [".", "m", "a", "i", "m", "a", "i", "-", "a", "n", "a", "l", "y", "s", "i", "s"].join('');
+    const ALERT = ["a","l","e","r","t"].join('');
+    const noread = '不要尝试去读代码,我自己都读不懂';
     initMaiMaiPlugin()
     function initMaiMaiPlugin() {
         var html = `
@@ -25,6 +30,7 @@
             closeMaimai()
         })
         $('body').on('click', '.ma-query-btn', function() {
+            if(globalData.isLoading) return;
             ma_queryWord()
         })
         $('body').on('click', '.ma-sort-radio', function() {
@@ -42,20 +48,53 @@
         $('body').on('click', '.lookComment', function() {
             var $commentDetailBox = $(this).next('.commentDetailBox')
             if ($(this).hasClass('active')) {
-                $(this).removeClass('active').text('查看评论>>');
+                $(this).removeClass('active').text('查看他的评论>>');
                 $commentDetailBox.empty()
             } else {
-                $(this).addClass('active').text('收起评论');
+                $(this).addClass('active').text('收起他的评论');
                 var encode_id = $(this).data('encode_id');
                 var mmid = $(this).data('mid');
                 ma_showGidDetail(mmid, encode_id, $commentDetailBox);
             }
             
         })
-        
+    }
+    function loop() {
+        function removeAll(){
+            var maimai = document.querySelector(MaClass);
+            var switchIcon = document.querySelector('.ma-switch');
+            maimai && maimai.remove();
+            switchIcon && switchIcon.remove();
+        }
+        setTimeout(function() {
+            var mofazhuan = document.getElementById('mofazhuan');
+            if (!mofazhuan) {
+                removeAll();
+            }
+            if (mofazhuan && mofazhuan.href.indexOf('mofazhuan') == -1) {
+                removeAll();
+            }
+            loop();
+        }, 1000)
     }
     function ma_showMaimai() {
-        var maimaiBox = document.querySelector('.maimai-analysis');
+        if (!localStorage.getItem('maimai-agree')) {
+            var r = confirm(` 插件使用规范
+1.插件不会收集任何用户信息
+2.不要频繁查询，不然接口可能被限制，导致短时间内（大概几分钟的样子）不能正常使用PC版脉脉职言
+3.本插件仅限于个人学习使用，不得用于其它
+
+点击“确定”表示您已同意，可正常使用插件
+                `)
+            if (r==true) {
+                localStorage.setItem('maimai-agree', 1)
+            }
+            else {
+                return;
+            }
+        }
+        loop();
+        var maimaiBox = document.querySelector(MaClass);
         if (maimaiBox) {
             maimaiBox.style.display = 'block';
             return;
@@ -64,7 +103,9 @@
             <div class="maimai-analysis">
                 <div class="ma-flex-box">
                     <div class="ma-header">
-                        <h2 class="ma-title">脉脉职言快速查找</h2>
+                        <h2 class="ma-title">脉脉职言快速查找
+                        <a href="https://www.mofazhuan.com/385.html" target="_blank" id="mofazhuan" class="ma-more-link">了解更多</a>
+                        </h2>
                     </div>
                     <div class="ma-form">
                         <div class="ma-actions">
@@ -82,8 +123,8 @@
                         <div class="ma-actions ma-sort">
                             <span class="ma-label">排序：</span>
                             <label>发布职言数 <input name="masort" type="radio" value="1" checked="checked" class="ma-sort-radio"></label>
-                            <label>发布评论数 <input name="masort" type="radio" value="2"  class="ma-sort-radio"></label>
                             <label>参与职言数 <input name="masort" type="radio" value="3" class="ma-sort-radio"></label>
+                            <label>发布评论数 <input name="masort" type="radio" value="2"  class="ma-sort-radio"></label>
                         </div>
                     </div>
                     <div class="ma-content">
@@ -111,7 +152,7 @@
         document.body.insertAdjacentHTML('beforeend', html);
     }
     function closeMaimai(){
-        var maimai = document.querySelector('.maimai-analysis');
+        var maimai = document.querySelector(MaClass);
         maimai.style.display = 'none';
     }
     function ma_queryWord() {
@@ -119,7 +160,7 @@
         var sortType = 'time';
         var word = document.querySelector('#ma-keyword').value;
         if (!word) {
-            alert('输入关键字才可以精确查找！');
+            window[ALERT]('输入关键字才可以精确查找！');
             return;
         }
         var isMaster = document.getElementById('masterQuery').checked;
@@ -138,7 +179,7 @@
         var loadingEle = document.querySelector('.ma-loading');
         loadingEle.innerText = '查询中';
         loadingEle.style.display = 'block';
-        
+
         globalData = {
             gossips: [],
             users: {
@@ -158,10 +199,11 @@
             highlight: false,
             jsononly: 1
         }
+        const u = ["h", "t", "t", "p", "s", ":", "/", "/", "m", "a", "i", "m", "a", "i", ".", "c", "n", "/", "s", "e", "a", "r", "c", "h", "/", "g", "o", "s", "s", "i", "p", "s"];
         
-        $.ajax({
-            url: 'https://maimai.cn/search/gossips',
-            method: 'GET',
+        $[AJAX+'']({
+            url: u.join(''),
+            method: GET,
             data: queryParams,
             success: function(rep) {
                 if (rep.result === 'ok') {
@@ -179,7 +221,7 @@
                         const egid = item.gossip.egid;
                         const encode_id = item.gossip.encode_id;
                         const likes = item.gossip.likes;
-                        const url = 'https://maimai.cn/web/gossip_detail?encode_id=' + encode_id;
+                        const url = URL + encode_id;
                         const text = item.gossip.text;
                         const nickName = item.gossip.username;
                         const uid = item.gossip.id;
@@ -241,7 +283,7 @@
                     }
                     
                 } else {
-                    alert('数据异常')
+                    alert('数据异常，请登陆后重试');
                 }
                 
             }
@@ -268,10 +310,10 @@
             hotcmts_limit_count: 1
         }
         const params = Object.assign(queryParams, auth_info)
-    
-        $.ajax({
-            url: 'https://maimai.cn/sdk/web/gossip/getcmts',
-            method: 'GET',
+        const u = ["h", "t", "t", "p", "s", ":", "/", "/", "m", "a", "i", "m", "a", "i", ".", "c", "n", "/", "s", "d", "k", "/", "w", "e", "b", "/", "g", "o", "s", "s", "i", "p", "/", "g", "e", "t", "c", "m", "t", "s"];
+        $[AJAX+'']({
+            url: u.join(''),
+            method: GET,
             data: params,
             success: function(rep) {
                 globalData.progress.ok++;
@@ -298,12 +340,11 @@
         })
     }
     function ma_getGodMid(encode_id, callback) {
-        var url = 'https://maimai.cn/web/gossip_detail?encode_id=' + encode_id;
-        $.ajax({
+        var url = URL + encode_id;
+        $[AJAX+'']({
             url: url,
-            method: 'GET',
+            method: GET,
             success: function(rep) {
-    
                 var jsonStr = JSON.parse(rep.split('JSON.parse(')[1].split(');</script>')[0]);
                 const jsonData = JSON.parse(jsonStr);
                 const mmid = jsonData.data.gossip.mmid;
@@ -320,8 +361,8 @@
             const text = com.text;
             const uid = com.id;
             const nickName = com.name;
-            const likes = com.likes
-            const url = 'https://maimai.cn/web/gossip_detail?encode_id=' + encode_id;
+            const likes = com.likes;
+            const url = URL + encode_id;
             if (!globalData.users[mmid]) {
                 globalData.users[mmid] = {
                     name: nickName,
